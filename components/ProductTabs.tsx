@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts, getCollections } from '../lib/shopify';
+import { getProducts } from '../lib/shopify';
+import Image from 'next/image';
 
 import { Product as ShopifyProduct } from 'shopify-buy';
 
@@ -54,7 +55,7 @@ export function ProductTabs() {
     };
 
     fetchProducts();
-  }, []);
+  }, [activeTab]);
 
   const filterProducts = (products: Product[], category: string) => {
     if (category === 'all') {
@@ -126,10 +127,12 @@ export function ProductTabs() {
             >
               <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
                 {product.images[0] && (
-                  <img
-                    src={product.images[0].src}
-                    alt={product.title}
-                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                  <Image 
+                    src={product.images[0].src} 
+                    alt={product.title || ''} 
+                    width={500}
+                    height={300}
+                    className="w-full h-auto"
                   />
                 )}
               </div>
