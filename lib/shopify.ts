@@ -1,10 +1,11 @@
-import Client, { Checkout } from 'shopify-buy';
+import Client, { Product, Checkout, ProductVariant } from 'shopify-buy';
+import { withRetry } from './utils';
 
 export type { Checkout };
 
 const client = Client.buildClient({
-  domain: '3zmiey-nc.myshopify.com',
-  storefrontAccessToken: '037386cf4aa2036e501823d5815793d3',
+  domain: process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN || '3zmiey-nc.myshopify.com',
+  storefrontAccessToken: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN || '037386cf4aa2036e501823d5815793d3',
   apiVersion: '2024-01'
 });
 
@@ -18,11 +19,18 @@ export interface ShopifyProduct {
     id: string;
     price: { amount: string };
     available: boolean;
-    inventoryQuantity: number;
+    inventoryQuantity: number | null;
   }[];
   availableForSale: boolean;
   tags: string[];
   vendor: string;
+  handle: string;
+  priceRange: {
+    minVariantPrice: {
+      amount: string;
+      currencyCode: string;
+    };
+  };
 }
 
 // Helper function to check if a product is available for pre-order
@@ -77,8 +85,38 @@ async function initializeCheckout(): Promise<Checkout> {
 
 export async function getProducts(): Promise<ShopifyProduct[]> {
   try {
-    const products = await client.product.fetchAll();
-    return JSON.parse(JSON.stringify(products));
+    const products = await withRetry(() => client.product.fetchAll());
+    
+    // Transform the products to match our interface
+    const transformedProducts = products.map(product => ({
+      id: product.id,
+      title: product.title,
+      description: product.description,
+      productType: product.productType,
+      images: product.images.map(image => ({
+        src: image.src
+      })),
+      variants: product.variants.map(variant => ({
+        id: variant.id,
+        price: {
+          amount: variant.price.toString()
+        },
+        available: !variant.currentlyNotInStock,
+        inventoryQuantity: null
+      })),
+      availableForSale: product.availableForSale,
+      tags: product.tags,
+      vendor: product.vendor,
+      handle: product.handle,
+      priceRange: {
+        minVariantPrice: {
+          amount: product.variants[0]?.price.toString() || "0",
+          currencyCode: "KES"
+        }
+      }
+    }));
+
+    return transformedProducts;
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
@@ -129,7 +167,7 @@ export async function addToCart(variantId: string, quantity: number = 1): Promis
 
     // Initialize or fetch existing checkout
     if (!checkout) {
-      checkout = await initializeCheckout();
+      checkout = await withRetry(() => initializeCheckout());
     }
 
     // Add the item to the cart
@@ -138,7 +176,9 @@ export async function addToCart(variantId: string, quantity: number = 1): Promis
       quantity,
     }];
 
-    const updatedCheckout = await client.checkout.addLineItems(checkout.id, lineItemsToAdd);
+    const updatedCheckout = await withRetry(() => 
+      client.checkout.addLineItems(checkout!.id, lineItemsToAdd)
+    );
     checkout = updatedCheckout;
 
     // Redirect to checkout

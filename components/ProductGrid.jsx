@@ -3,7 +3,7 @@ import { isPreOrderProduct, getPreOrderShippingDate } from '../lib/shopify';
 import { AddToCartButton } from './AddToCartButton';
 
 export default function ProductGrid({ products }) {
-  if (!products.length) {
+  if (!products?.length) {
     return (
       <div className="text-center py-10">
         No products found for this category.
@@ -18,14 +18,15 @@ export default function ProductGrid({ products }) {
         const shippingDate = isPreOrder ? getPreOrderShippingDate(product) : null;
         const variant = product.variants[0];
         const isOutOfStock = variant && !variant.available && !isPreOrder;
+        const imageUrl = product.images[0]?.src;
 
         return (
           <div key={product.id} className="flex flex-col gap-5">
             <div className="relative w-full aspect-square bg-white border border-[#e7e7e7]">
-              {product.images.edges[0] && (
+              {imageUrl && (
                 <Image
-                  src={product.images.edges[0].node.url}
-                  alt={product.images.edges[0].node.altText || product.title}
+                  src={imageUrl}
+                  alt={product.title}
                   className="object-contain"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
