@@ -80,7 +80,7 @@ export function Cart() {
     ? new Intl.NumberFormat('en-KE', { 
         style: 'currency', 
         currency: 'KES' 
-      }).format(parseFloat(checkout.subtotalPrice.amount))
+      }).format(Number(checkout.subtotalPrice.amount))
     : 'KSH 0.00';
 
   return (
@@ -117,7 +117,7 @@ export function Cart() {
                 {new Intl.NumberFormat('en-KE', { 
                   style: 'currency', 
                   currency: 'KES' 
-                }).format(item.variant?.price ? parseFloat(item.variant.price.amount) : 0)}
+                }).format(item.variant?.price ? Number(item.variant.price.amount) : 0)}
               </p>
             </div>
 
