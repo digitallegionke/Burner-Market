@@ -19,4 +19,30 @@ export const PLASMIC = initPlasmicLoader({
 // http://localhost:3000/plasmic-host).  See
 // https://docs.plasmic.app/learn/app-hosting/#set-a-plasmic-project-to-use-your-app-host
 
-// PLASMIC.registerComponent(...);
+// Register components
+import { AddToCartButton } from './components/AddToCartButton';
+import { ProductTabs } from './components/ProductTabs';
+
+PLASMIC.registerComponent(AddToCartButton, {
+  name: 'AddToCartButton',
+  props: {
+    variantId: {
+      type: 'string',
+      description: 'Shopify variant ID for the product'
+    },
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes to apply'
+    }
+  }
+});
+
+PLASMIC.registerComponent(ProductTabs, {
+  name: 'ProductTabs',
+  props: {
+    className: {
+      type: 'string',
+      description: 'Additional CSS classes to apply'
+    }
+  }
+});

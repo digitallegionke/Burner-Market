@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
@@ -10,3 +11,6 @@ export default function Home() {
 
   return null;
 } 
+=======
+ 
+>>>>>>> 30bfc45
