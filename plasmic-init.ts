@@ -8,11 +8,8 @@ export const PLASMIC = initPlasmicLoader({
     },
   ],
 
-  // By default Plasmic will use the last published version of your project.
-  // For development, you can set preview to true, which will use the unpublished
-  // project, allowing you to see your designs without publishing.  Please
-  // only use this for development, as this is significantly slower.
-  preview: false,
+  // Enable preview mode in development
+  preview: process.env.NODE_ENV === 'development',
 });
 
 // You can register any code components that you want to use here; see
